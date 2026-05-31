@@ -1,33 +1,70 @@
-import { PhoneAuthProvider, signInWithCredential, signOut } from 'firebase/auth';
-import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase/config';
 import { getDeviceId, getDeviceSummary } from './deviceService';
+
 export const DEVICE_LINKED_ERROR = 'Esta cuenta ya está vinculada a otro dispositivo. Contacta a soporte para cambiar de equipo.';
-export async function sendSmsCode(phoneNumber, recaptchaVerifier) {
-  const provider = new PhoneAuthProvider(auth);
-  return provider.verifyPhoneNumber(phoneNumber, recaptchaVerifier);
+export const MOCK_SMS_CODE = '123456';
+
+let currentUser = null;
+const profiles = new Map();
+const deviceChangeRequests = [];
+
+export function getCurrentUser() {
+  return currentUser;
 }
+
+export async function sendSmsCode(phoneNumber) {
+  return `mock-verification:${phoneNumber}:${Date.now()}`;
+}
+
 export async function verifySmsCode(verificationId, code) {
-  const credential = PhoneAuthProvider.credential(verificationId, code);
-  const result = await signInWithCredential(auth, credential);
-  await enforceSingleDevice(result.user);
-  return result.user;
+  if (!verificationId?.startsWith('mock-verification:')) {
+    throw new Error('Solicita un código SMS antes de continuar.');
+  }
+  if (code !== MOCK_SMS_CODE) {
+    throw new Error(`Para esta demo usa el código ${MOCK_SMS_CODE}.`);
+  }
+  const [, phoneNumber] = verificationId.split(':');
+  const user = { uid: `demo-${phoneNumber.replace(/\D/g, '')}`, phoneNumber };
+  await enforceSingleDevice(user);
+  currentUser = user;
+  return user;
 }
+
 export async function enforceSingleDevice(user) {
   const deviceId = await getDeviceId();
-  const ref = doc(db, 'users', user.uid);
-  const snapshot = await getDoc(ref);
-  const profile = snapshot.data();
+  const profile = profiles.get(user.uid);
   if (profile?.deviceId && profile.deviceId !== deviceId) {
-    await signOut(auth);
+    currentUser = null;
     throw new Error(DEVICE_LINKED_ERROR);
   }
-  await setDoc(ref, { uid: user.uid, phoneNumber: user.phoneNumber, registeredAt: profile?.registeredAt ?? serverTimestamp(), deviceId, deviceName: getDeviceSummary(), accountStatus: 'active', updatedAt: serverTimestamp() }, { merge: true });
+  profiles.set(user.uid, {
+    ...profile,
+    uid: user.uid,
+    phoneNumber: user.phoneNumber,
+    registeredAt: profile?.registeredAt ?? new Date().toISOString(),
+    deviceId,
+    deviceName: getDeviceSummary(),
+    accountStatus: 'active',
+    updatedAt: new Date().toISOString(),
+  });
   return deviceId;
 }
+
 export async function requestDeviceChange(user, details = '') {
   const deviceId = await getDeviceId();
-  await setDoc(doc(db, 'deviceChangeRequests', `${user.uid}-${Date.now()}`), { uid: user.uid, phoneNumber: user.phoneNumber, requestedDeviceId: deviceId, requestedDeviceName: getDeviceSummary(), details, status: 'pending', createdAt: serverTimestamp() });
+  const request = {
+    id: `${user.uid}-${Date.now()}`,
+    uid: user.uid,
+    phoneNumber: user.phoneNumber,
+    requestedDeviceId: deviceId,
+    requestedDeviceName: getDeviceSummary(),
+    details,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  };
+  deviceChangeRequests.push(request);
+  return request;
 }
-// Producción: reforzar la regla de dispositivo único con Firebase App Check,
-// tokens de sesión revocables y validaciones autoritativas en backend/Cloud Functions.
+
+// MVP Expo Go: este servicio es un mock local deliberado. La integración real
+// de Firebase Phone Auth y Firestore debe vivir detrás de una implementación
+// separada que solo se cargue en un development build compatible.
