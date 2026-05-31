@@ -1,10 +1,8 @@
 import Constants from 'expo-constants';
-import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
 
 const extra = Constants.expoConfig?.extra ?? {};
-const firebaseConfig = {
+
+export const firebaseConfig = {
   apiKey: extra.firebaseApiKey,
   authDomain: extra.firebaseAuthDomain,
   projectId: extra.firebaseProjectId,
@@ -12,6 +10,7 @@ const firebaseConfig = {
   messagingSenderId: extra.firebaseMessagingSenderId,
   appId: extra.firebaseAppId,
 };
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+
+// Expo Go MVP: no inicializar el SDK web de Firebase desde este módulo. Las
+// implementaciones Firebase reales deben aislarse en un development build para
+// que el SDK no se incluya en el bundle inicial compatible con Expo Go.
