@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+    match /users/{uid} {
+      allow read: if owns(uid);
+      // Base inicial: mover el alta y la validación del deviceId a Cloud Functions
+      // antes de producción para evitar que un cliente manipulado omita la regla.
+      allow create, update: if owns(uid);
+    }
+    match /deviceChangeRequests/{requestId} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+    match /cases/{caseId} {
+      allow read: if signedIn() && request.auth.uid == resource.data.uid;
+      allow create, update: if signedIn() && request.auth.uid == request.resource.data.uid;
+    }
+    match /hearings/{hearingId} {
+      allow read: if signedIn() && request.auth.uid == resource.data.uid;
+      allow create, update: if signedIn() && request.auth.uid == request.resource.data.uid;
+      match /messages/{messageId} {
+        allow read, create: if signedIn();
+      }
+    }
+  }
+}
