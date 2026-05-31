@@ -6,16 +6,24 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "ios": { "supportsTablet": true, "bundleIdentifier": "mx.mijuzgadovirtual.app" },
-    "android": { "package": "mx.mijuzgadovirtual.app" },
-    "plugins": ["expo-secure-store"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "mx.mijuzgadovirtual.app"
+    },
+    "android": {
+      "package": "mx.mijuzgadovirtual.app"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
     "extra": {
       "firebaseApiKey": "YOUR_FIREBASE_API_KEY",
       "firebaseAuthDomain": "YOUR_PROJECT.firebaseapp.com",
       "firebaseProjectId": "YOUR_PROJECT_ID",
       "firebaseStorageBucket": "YOUR_PROJECT.appspot.com",
       "firebaseMessagingSenderId": "YOUR_SENDER_ID",
-      "firebaseAppId": "YOUR_APP_ID"
+      "firebaseAppId": "YOUR_APP_ID",
+      "firebaseAuthMode": "mock"
     }
   }
 }

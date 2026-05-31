@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 const required = [
   'App.js', 'app.json', 'babel.config.js', 'firestore.rules',
-  'src/services/aiService.js', 'src/services/legalKnowledgeService.js', 'src/services/authService.js', 'src/services/hearingService.js',
+  'src/services/aiService.js', 'src/services/legalKnowledgeService.js', 'src/services/authService.js', 'src/services/auth/mockAuthAdapter.js', 'src/services/auth/firebaseAuthAdapter.js', 'src/services/hearingService.js',
   'src/firebase/config.js', 'src/components/AppButton.js', 'src/components/AppCard.js',
   'src/screens/WelcomeScreen.js', 'src/screens/LoginScreen.js', 'src/screens/RegisterScreen.js', 'src/screens/DashboardScreen.js',
   'src/screens/CaseInfoScreen.js', 'src/screens/HearingRoomScreen.js', 'src/screens/ProfileScreen.js'
@@ -33,4 +33,13 @@ const sourceFiles = ['App.js', ...listJavaScriptFiles('src')];
 const unsafeFirebaseImports = sourceFiles.filter((file) => /from ['"]firebase\//.test(readFileSync(file, 'utf8')));
 if (unsafeFirebaseImports.length) throw new Error(`Unsafe Firebase runtime imports: ${unsafeFirebaseImports.join(', ')}`);
 
-console.log(`Project structure OK: ${required.length} required files found; Expo Go startup is Firebase-free and SDK versions are aligned.`);
+const authService = readFileSync('src/services/authService.js', 'utf8');
+for (const method of ['sendPhoneCode', 'confirmPhoneCode', 'logout', 'getCurrentUser']) {
+  if (!authService.includes(method)) throw new Error(`Missing auth service method: ${method}`);
+}
+const firebaseAdapter = readFileSync('src/services/auth/firebaseAuthAdapter.js', 'utf8');
+for (const field of ['uid', 'phoneNumber', 'createdAt', 'deviceId', 'accountStatus']) {
+  if (!firebaseAdapter.includes(field)) throw new Error(`Missing Firestore user profile field: ${field}`);
+}
+
+console.log(`Project structure OK: ${required.length} required files found; Expo Go startup is Firebase-SDK-free and SDK versions are aligned.`);

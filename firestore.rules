@@ -5,9 +5,18 @@ service cloud.firestore {
     function owns(uid) { return signedIn() && request.auth.uid == uid; }
     match /users/{uid} {
       allow read: if owns(uid);
-      // Base inicial: mover el alta y la validación del deviceId a Cloud Functions
-      // antes de producción para evitar que un cliente manipulado omita la regla.
-      allow create, update: if owns(uid);
+      // El cliente puede dar de alta su perfil una sola vez. Los campos de vínculo
+      // no pueden modificarse desde la app; un cambio de equipo debe pasar por soporte.
+      allow create: if owns(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.accountStatus == 'active'
+        && request.resource.data.keys().hasAll(['uid', 'phoneNumber', 'createdAt', 'deviceId', 'accountStatus']);
+      allow update: if owns(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.phoneNumber == resource.data.phoneNumber
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.deviceId == resource.data.deviceId
+        && request.resource.data.accountStatus == resource.data.accountStatus;
     }
     match /deviceChangeRequests/{requestId} {
       allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
