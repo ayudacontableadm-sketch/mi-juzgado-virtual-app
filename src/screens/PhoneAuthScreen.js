@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import AppButton from '../components/AppButton';
+import ScreenContainer from '../components/ScreenContainer';
 import { authMode, confirmPhoneCode, DEVICE_LINKED_ERROR, sendPhoneCode } from '../services/authService';
 import { colors, radii, spacing, typography } from '../theme/theme';
 
@@ -49,7 +50,9 @@ export default function PhoneAuthScreen({ navigation, mode = 'login' }) {
     }
   }
 
-  return <View style={styles.screen}>
+  return <ScreenContainer>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.keyboardArea}>
+      <ScrollView contentContainerStyle={styles.screen} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
     <View>
       <Text style={styles.eyebrow}>MI JUZGADO VIRTUAL</Text>
       <Text style={styles.title}>{register ? 'Crea tu cuenta' : 'Inicia sesión'}</Text>
@@ -69,12 +72,15 @@ export default function PhoneAuthScreen({ navigation, mode = 'login' }) {
       <AppButton variant="secondary" title="Entrar a demo navegable" onPress={() => navigation.replace('Dashboard')} />
     </View>
     <Text style={styles.bottom}>{register ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'} <Text onPress={() => navigation.replace(register ? 'Login' : 'Register')} style={styles.link}>{register ? 'Iniciar sesión' : 'Registrarme'}</Text></Text>
-  </View>;
+      </ScrollView>
+    </KeyboardAvoidingView>
+  </ScreenContainer>;
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.white, padding: spacing.xl, justifyContent: 'space-between' },
-  eyebrow: { ...typography.small, color: colors.teal, fontWeight: '800', marginTop: spacing.xxxl },
+  keyboardArea: { flex: 1 },
+  screen: { flexGrow: 1, padding: spacing.xl, justifyContent: 'space-between', gap: spacing.xl },
+  eyebrow: { ...typography.small, color: colors.teal, fontWeight: '800', marginTop: spacing.lg },
   title: { ...typography.h1, color: colors.ink, marginTop: spacing.sm },
   copy: { ...typography.body, color: colors.muted, marginTop: spacing.md },
   mockNotice: { ...typography.small, color: colors.teal, marginTop: spacing.md, fontWeight: '700' },
@@ -83,6 +89,6 @@ const styles = StyleSheet.create({
   label: { ...typography.small, color: colors.ink, fontWeight: '700' },
   input: { minHeight: 52, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, backgroundColor: colors.surface, paddingHorizontal: spacing.lg, ...typography.body, color: colors.ink },
   resend: { ...typography.small, color: colors.teal, fontWeight: '800', textAlign: 'center', paddingVertical: spacing.xs },
-  bottom: { ...typography.body, textAlign: 'center', color: colors.text, paddingBottom: spacing.xl },
+  bottom: { ...typography.body, textAlign: 'center', color: colors.text, paddingBottom: spacing.md },
   link: { color: colors.teal, fontWeight: '800' },
 });
