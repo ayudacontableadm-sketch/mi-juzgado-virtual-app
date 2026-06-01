@@ -4,7 +4,7 @@ import { join } from 'node:path';
 const required = [
   'App.js', 'app.json', 'babel.config.js', 'firestore.rules',
   'src/services/aiService.js', 'src/services/legalKnowledgeService.js', 'src/services/authService.js', 'src/services/auth/mockAuthAdapter.js', 'src/services/auth/firebaseAuthAdapter.js', 'src/services/hearingService.js',
-  'src/firebase/config.js', 'src/components/AppButton.js', 'src/components/AppCard.js',
+  'src/config/firebase.js', 'src/components/AppButton.js', 'src/components/AppCard.js',
   'src/screens/WelcomeScreen.js', 'src/screens/LoginScreen.js', 'src/screens/RegisterScreen.js', 'src/screens/DashboardScreen.js',
   'src/screens/CaseInfoScreen.js', 'src/screens/HearingRoomScreen.js', 'src/screens/ProfileScreen.js'
 ];
@@ -15,6 +15,7 @@ const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 for (const dependency of ['expo', '@react-navigation/native', 'expo-application', 'expo-device']) {
   if (!pkg.dependencies[dependency]) throw new Error(`Missing dependency: ${dependency}`);
 }
+if (!pkg.devDependencies['babel-preset-expo']) throw new Error('Missing dev dependency: babel-preset-expo');
 if (pkg.dependencies.firebase) throw new Error('Firebase web SDK must not be bundled in the Expo Go MVP.');
 if (!pkg.dependencies.expo.startsWith('^54.')) throw new Error('Expo Go MVP must use Expo SDK 54.');
 if (pkg.dependencies.react !== '19.1.0') throw new Error('Expo SDK 54 must use React 19.1.0.');

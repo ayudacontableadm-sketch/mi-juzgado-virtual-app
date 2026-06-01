@@ -12,6 +12,12 @@ export default function PhoneAuthScreen({ navigation, mode = 'login' }) {
   const [loading, setLoading] = useState(false);
   const register = mode === 'register';
 
+  function updatePhone(value) {
+    setPhone(value);
+    setCode('');
+    setCodeSent(false);
+  }
+
   async function sendCode() {
     if (phone.replace(/\D/g, '').length < 12) return Alert.alert('Número incompleto', 'Ingresa tu número con lada y código de país.');
     try {
@@ -53,12 +59,13 @@ export default function PhoneAuthScreen({ navigation, mode = 'login' }) {
     </View>
     <View style={styles.form}>
       <Text style={styles.label}>Número de celular</Text>
-      <TextInput value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.input} placeholder="+52 55 1234 5678" />
+      <TextInput accessibilityLabel="Número de celular" value={phone} onChangeText={updatePhone} keyboardType="phone-pad" style={styles.input} placeholder="+52 55 1234 5678" />
       {codeSent && <>
         <Text style={styles.label}>Código SMS</Text>
-        <TextInput value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} style={styles.input} placeholder="000000" />
+        <TextInput accessibilityLabel="Código SMS" value={code} onChangeText={setCode} keyboardType="number-pad" maxLength={6} style={styles.input} placeholder="000000" />
       </>}
       <AppButton loading={loading} title={codeSent ? 'Verificar código' : 'Enviar código SMS'} onPress={codeSent ? verify : sendCode} />
+      {codeSent && <Text onPress={sendCode} style={styles.resend}>Reenviar código SMS</Text>}
       <AppButton variant="secondary" title="Entrar a demo navegable" onPress={() => navigation.replace('Dashboard')} />
     </View>
     <Text style={styles.bottom}>{register ? '¿Ya tienes cuenta?' : '¿Aún no tienes cuenta?'} <Text onPress={() => navigation.replace(register ? 'Login' : 'Register')} style={styles.link}>{register ? 'Iniciar sesión' : 'Registrarme'}</Text></Text>
@@ -75,6 +82,7 @@ const styles = StyleSheet.create({
   form: { gap: spacing.md },
   label: { ...typography.small, color: colors.ink, fontWeight: '700' },
   input: { minHeight: 52, borderWidth: 1, borderColor: colors.border, borderRadius: radii.md, backgroundColor: colors.surface, paddingHorizontal: spacing.lg, ...typography.body, color: colors.ink },
+  resend: { ...typography.small, color: colors.teal, fontWeight: '800', textAlign: 'center', paddingVertical: spacing.xs },
   bottom: { ...typography.body, textAlign: 'center', color: colors.text, paddingBottom: spacing.xl },
   link: { color: colors.teal, fontWeight: '800' },
 });

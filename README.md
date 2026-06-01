@@ -39,7 +39,7 @@ npm run web
 
 ## Configuración pública de Firebase
 
-Firebase usa configuración pública, no credenciales administrativas. Puedes reemplazar los placeholders seguros de `app.json > expo.extra` o definir estas variables antes de iniciar Expo:
+Firebase usa configuración pública, no credenciales administrativas. `src/config/firebase.js` carga el `firebaseConfig` actual desde `app.json > expo.extra` y permite sobrescribirlo mediante variables de entorno. Puedes reemplazar los placeholders seguros o definir estas variables antes de iniciar Expo:
 
 ```bash
 export EXPO_PUBLIC_FIREBASE_API_KEY="..."
@@ -93,7 +93,7 @@ deviceChangeRequests/{requestId}
 
 ```text
 src/
-  firebase/       Configuración pública de Firebase y selección de modo
+  config/         Configuración pública de Firebase y selección de modo
   services/auth/  Adaptadores mock y Firebase REST separados
   services/       Fachada auth, dispositivo, mocks de audiencia e IA
   screens/        Pantallas de la app

@@ -1,4 +1,4 @@
-import { getFirestoreDocumentUrl, getIdentityToolkitUrl } from '../../firebase/config';
+import { getFirestoreDocumentUrl, getIdentityToolkitUrl } from '../../config/firebase';
 import { getDeviceId, getDeviceSummary } from '../deviceService';
 
 let currentUser = null;
