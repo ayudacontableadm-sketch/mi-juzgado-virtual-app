@@ -1,4 +1,4 @@
-import { isMockAuthMode } from '../firebase/config';
+import { isMockAuthMode } from '../config/firebase';
 import * as firebaseAuth from './auth/firebaseAuthAdapter';
 import * as mockAuth from './auth/mockAuthAdapter';
 
